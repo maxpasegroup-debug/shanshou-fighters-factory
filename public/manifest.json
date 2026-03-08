@@ -1,0 +1,21 @@
+{
+  "name": "Sanshou - The Fighters' Factory",
+  "short_name": "Sanshou",
+  "description": "Global martial arts training marketplace",
+  "start_url": "/home",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#ff3c00",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
