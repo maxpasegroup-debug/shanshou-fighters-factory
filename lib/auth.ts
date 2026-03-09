@@ -3,12 +3,16 @@ import { AuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
+import { getEnv } from "@/lib/env";
 import User from "@/models/User";
 import { connectToDatabase } from "@/lib/mongodb";
 
+const env = getEnv();
+const hasGoogleAuth = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+
 export const authOptions: AuthOptions = {
   session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "Email",
@@ -35,10 +39,14 @@ export const authOptions: AuthOptions = {
         };
       },
     }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
+    ...(hasGoogleAuth
+      ? [
+          GoogleProvider({
+            clientId: env.GOOGLE_CLIENT_ID!,
+            clientSecret: env.GOOGLE_CLIENT_SECRET!,
+          }),
+        ]
+      : []),
   ],
   callbacks: {
     async signIn({ user, account }) {

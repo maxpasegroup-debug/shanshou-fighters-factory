@@ -1,20 +1,32 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
+import { applyRateLimit, badRequest, conflict, getClientKey, handleApiError } from "@/lib/api";
 import User from "@/models/User";
 import { connectToDatabase } from "@/lib/mongodb";
 
+const registerSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(8).max(128),
+});
+
 export async function POST(request: Request) {
   try {
-    const { name, email, password, role } = await request.json();
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const rate = applyRateLimit(getClientKey(request, "register"), { limit: 10, windowMs: 60_000 });
+    if (!rate.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
+
+    const payload = registerSchema.safeParse(await request.json());
+    if (!payload.success) return badRequest(payload.error.issues[0]?.message || "Invalid payload");
+    const { name, email, password } = payload.data;
 
     await connectToDatabase();
     const existing = await User.findOne({ email });
     if (existing) {
-      return NextResponse.json({ error: "Email already in use" }, { status: 409 });
+      return conflict("Email already in use");
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -22,7 +34,7 @@ export async function POST(request: Request) {
       name,
       email,
       password: hashedPassword,
-      role: role || "student",
+      role: "student",
     });
 
     return NextResponse.json(
@@ -33,6 +45,6 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
-    return NextResponse.json({ error: "Failed to register", details: `${error}` }, { status: 500 });
+    return handleApiError("auth/register", error);
   }
 }

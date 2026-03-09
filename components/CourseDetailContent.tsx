@@ -22,6 +22,9 @@ type CoursePayload = {
     };
   };
   lessons: Array<{ _id: string; title: string; videoUrl: string }>;
+  hasAccess: boolean;
+  progress?: number;
+  completedLessons?: string[];
 };
 
 type ReviewItem = {
@@ -81,6 +84,8 @@ export default function CourseDetailContent({ courseId }: { courseId: string }) 
   }
 
   const { course, lessons } = courseData;
+  const hasAccess = Boolean(courseData.hasAccess);
+  const progress = Number(courseData.progress || 0);
 
   return (
     <div className="space-y-5">
@@ -107,7 +112,20 @@ export default function CourseDetailContent({ courseId }: { courseId: string }) 
 
       <section>
         <h2 className="mb-2 font-semibold">Curriculum & Video Player</h2>
-        <VideoPlayer courseId={course._id} lessons={lessons} />
+        {hasAccess ? (
+          <>
+            <p className="mb-2 text-xs text-zinc-400">Progress: {progress}%</p>
+            <VideoPlayer
+              courseId={course._id}
+              lessons={lessons}
+              initialCompletedLessons={courseData.completedLessons || []}
+            />
+          </>
+        ) : (
+          <div className="glass-card p-4 text-sm text-zinc-300">
+            Enroll in this course to unlock lessons and video streaming.
+          </div>
+        )}
       </section>
 
       <section className="glass-card p-4">

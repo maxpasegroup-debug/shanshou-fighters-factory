@@ -1,6 +1,13 @@
 import mongoose from "mongoose";
+import { getEnv } from "@/lib/env";
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const getMongoUri = () => {
+  const uri = getEnv().MONGODB_URI;
+  if (!uri) {
+    throw new Error("MONGODB_URI is not defined");
+  }
+  return uri;
+};
 
 type MongooseCache = {
   conn: typeof mongoose | null;
@@ -22,14 +29,10 @@ if (!global.mongooseCache) {
 }
 
 export async function connectToDatabase() {
-  if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI is not defined");
-  }
-
   if (cache.conn) return cache.conn;
 
   if (!cache.promise) {
-    cache.promise = mongoose.connect(MONGODB_URI, { dbName: "sanshou-platform" });
+    cache.promise = mongoose.connect(getMongoUri(), { dbName: "sanshou-platform" });
   }
 
   cache.conn = await cache.promise;

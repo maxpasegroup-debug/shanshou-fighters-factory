@@ -11,17 +11,26 @@ type Lesson = {
 type VideoPlayerProps = {
   courseId: string;
   lessons: Lesson[];
+  initialCompletedLessons?: string[];
 };
 
-export default function VideoPlayer({ courseId, lessons }: VideoPlayerProps) {
+export default function VideoPlayer({
+  courseId,
+  lessons,
+  initialCompletedLessons = [],
+}: VideoPlayerProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [completed, setCompleted] = useState<string[]>([]);
+  const [completed, setCompleted] = useState<string[]>(initialCompletedLessons);
 
   const activeLesson = useMemo(() => lessons[activeIndex], [lessons, activeIndex]);
 
   useEffect(() => {
     if (activeIndex > lessons.length - 1) setActiveIndex(0);
   }, [activeIndex, lessons.length]);
+
+  useEffect(() => {
+    setCompleted(initialCompletedLessons);
+  }, [initialCompletedLessons]);
 
   if (!lessons.length) {
     return <div className="glass-card p-4 text-sm text-zinc-400">No lessons uploaded yet.</div>;

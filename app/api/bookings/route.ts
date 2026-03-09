@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { z } from "zod";
 
+import { badRequest, handleApiError, isValidObjectId, unauthorized } from "@/lib/api";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Booking from "@/models/Booking";
@@ -9,7 +11,7 @@ import Trainer from "@/models/Trainer";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session) return unauthorized();
 
     await connectToDatabase();
     const trainer = session.user.role === "trainer" ? await Trainer.findOne({ userId: session.user.id }).lean() : null;
@@ -23,21 +25,30 @@ export async function GET() {
 
     return NextResponse.json(bookings);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch bookings", details: `${error}` }, { status: 500 });
+    return handleApiError("bookings/list", error);
   }
 }
+
+const createBookingSchema = z.object({
+  trainerId: z.string(),
+  sessionDate: z.string().datetime(),
+  price: z.number().positive(),
+});
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session) return unauthorized();
 
-    const { trainerId, sessionDate, price } = await request.json();
-    if (!trainerId || !sessionDate || !price) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    const payload = createBookingSchema.safeParse(await request.json());
+    if (!payload.success) return badRequest(payload.error.issues[0]?.message || "Invalid payload");
+    const { trainerId, sessionDate, price } = payload.data;
+    if (!isValidObjectId(trainerId)) return badRequest("Invalid trainerId");
 
     await connectToDatabase();
+    const trainerExists = await Trainer.findById(trainerId).lean();
+    if (!trainerExists) return badRequest("Trainer not found");
+
     const booking = await Booking.create({
       trainerId,
       userId: session.user.id,
@@ -48,6 +59,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(booking, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create booking", details: `${error}` }, { status: 500 });
+    return handleApiError("bookings/create", error);
   }
 }
