@@ -34,45 +34,49 @@ export default async function ProfilePage() {
   let lessonCompletionRate = 0;
 
   if (session?.user?.id) {
-    await connectToDatabase();
-    const enrollmentsRaw = (await Enrollment.find({ userId: session.user.id }).lean()) as EnrollmentRaw[];
-    const enrollments: EnrollmentLean[] = enrollmentsRaw.map((item) => ({
-      courseId: item.courseId.toString(),
-      progress: item.progress,
-      completedLessons: item.completedLessons?.map((lesson) => lesson.toString()) || [],
-    }));
+    try {
+      await connectToDatabase();
+      const enrollmentsRaw = (await Enrollment.find({ userId: session.user.id }).lean()) as EnrollmentRaw[];
+      const enrollments: EnrollmentLean[] = enrollmentsRaw.map((item) => ({
+        courseId: item.courseId.toString(),
+        progress: item.progress,
+        completedLessons: item.completedLessons?.map((lesson) => lesson.toString()) || [],
+      }));
 
-    lessonsCompleted = enrollments.reduce((acc, item) => acc + (item.completedLessons?.length || 0), 0);
-    coursesCompleted = enrollments.filter((item) => (item.progress || 0) >= 100).length;
+      lessonsCompleted = enrollments.reduce((acc, item) => acc + (item.completedLessons?.length || 0), 0);
+      coursesCompleted = enrollments.filter((item) => (item.progress || 0) >= 100).length;
 
-    const courseIds = enrollments.map((item) => new mongoose.Types.ObjectId(item.courseId));
-    const totalLessons = courseIds.length
-      ? await Course.aggregate([
-          { $match: { _id: { $in: courseIds } } },
-          {
-            $lookup: {
-              from: "lessons",
-              localField: "_id",
-              foreignField: "courseId",
-              as: "courseLessons",
+      const courseIds = enrollments.map((item) => new mongoose.Types.ObjectId(item.courseId));
+      const totalLessons = courseIds.length
+        ? await Course.aggregate([
+            { $match: { _id: { $in: courseIds } } },
+            {
+              $lookup: {
+                from: "lessons",
+                localField: "_id",
+                foreignField: "courseId",
+                as: "courseLessons",
+              },
             },
-          },
-          {
-            $project: {
-              lessonCount: { $size: "$courseLessons" },
+            {
+              $project: {
+                lessonCount: { $size: "$courseLessons" },
+              },
             },
-          },
-          {
-            $group: {
-              _id: null,
-              total: { $sum: "$lessonCount" },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$lessonCount" },
+              },
             },
-          },
-        ])
-      : [];
+          ])
+        : [];
 
-    const lessonTotal = totalLessons[0]?.total || 0;
-    lessonCompletionRate = lessonTotal ? Math.round((lessonsCompleted / lessonTotal) * 100) : 0;
+      const lessonTotal = totalLessons[0]?.total || 0;
+      lessonCompletionRate = lessonTotal ? Math.round((lessonsCompleted / lessonTotal) * 100) : 0;
+    } catch (error) {
+      console.error("[profile] failed to load enrollment stats", error);
+    }
   }
 
   const badges = getBadges(coursesCompleted, lessonsCompleted);
