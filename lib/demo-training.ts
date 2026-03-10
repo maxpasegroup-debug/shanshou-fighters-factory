@@ -13,7 +13,7 @@ export const DEMO_COURSES = [
   { _id: "c8", title: "Meditation for Fighters", trainer: "Dr. Aisha Rahman", duration: "4 Weeks", category: "Mental Strength", level: "All levels", rating: 4.8, price: 49, thumbnail: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400&q=80", students: 150 },
   { _id: "c9", title: "Combat Agility Training", trainer: "Coach Ivan Petrov", duration: "5 Weeks", category: "Fitness", level: "Intermediate", rating: 4.7, price: 79, thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80", students: 110 },
   { _id: "c10", title: "Advanced Kickboxing Combinations", trainer: "Coach Daniel Reyes", duration: "8 Weeks", category: "Kickboxing", level: "Advanced", rating: 4.9, price: 129, thumbnail: "https://images.unsplash.com/photo-1549570652-97324981a6fd?w=400&q=80", students: 85 },
-] as const;
+];
 
 export const DEMO_EXPERTS = [
   { _id: "t1", name: "Master Chen Wei", photo: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=200&q=80", specialty: "Sanshou & Kickboxing", rating: 4.9, courses: 6, yearsExperience: 20 },
@@ -26,7 +26,7 @@ export const DEMO_EXPERTS = [
   { _id: "t8", name: "Dr. Aisha Rahman", photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80", specialty: "Mental Performance Coach", rating: 4.8, courses: 2, yearsExperience: 12 },
   { _id: "t9", name: "Coach Marco Silva", photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80", specialty: "Self Defence Expert", rating: 4.6, courses: 4, yearsExperience: 16 },
   { _id: "t10", name: "Coach Ivan Petrov", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80", specialty: "Combat Conditioning Trainer", rating: 4.7, courses: 3, yearsExperience: 11 },
-] as const;
+];
 
 function popularityScore(c: (typeof DEMO_COURSES)[number]) {
   return (c.students ?? 0) + (c.rating ?? 0) * 5;

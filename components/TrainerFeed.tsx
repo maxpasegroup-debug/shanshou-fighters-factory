@@ -129,14 +129,7 @@ export default function TrainerFeed({ fallbackTrainers }: TrainerFeedProps) {
       {normalized.length ? (
         <div className="grid gap-3 md:grid-cols-2">
           {normalized.map((trainer) => (
-            <TrainerCard
-              key={trainer._id}
-              trainer={{
-                ...trainer,
-                yearsExperience: "yearsExperience" in trainer ? trainer.yearsExperience : undefined,
-              }}
-              actionLabel="View Programs"
-            />
+            <TrainerCard key={trainer._id} trainer={trainer} actionLabel="View Programs" />
           ))}
         </div>
       ) : (
