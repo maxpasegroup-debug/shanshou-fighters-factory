@@ -90,7 +90,7 @@ export default function CourseFeed({ limit = 8, fallbackCourses }: CourseFeedPro
     );
   }
 
-  if (error) {
+  if (error && !fallbackCourses?.length) {
     return (
       <div className="glass-card p-4 text-sm">
         <p className="text-red-300">{error}</p>

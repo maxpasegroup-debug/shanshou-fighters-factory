@@ -13,8 +13,8 @@ const FloatingAICoach = dynamic(() => import("@/components/FloatingAICoach"), {
 });
 
 export const metadata: Metadata = {
-  title: "Sanshou - The Fighters' Factory",
-  description: "Global martial arts training marketplace",
+  title: "Sanshou – Global Martial Arts Academy",
+  description: "Netflix-style Sanshou training hub for courses and world-class experts.",
   manifest: "/manifest.json",
 };
 

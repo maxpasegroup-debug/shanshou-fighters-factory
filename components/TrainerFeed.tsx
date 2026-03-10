@@ -94,7 +94,7 @@ export default function TrainerFeed({ fallbackTrainers }: TrainerFeedProps) {
     );
   }
 
-  if (error) {
+  if (error && !fallbackTrainers?.length) {
     return (
       <div className="glass-card p-4 text-sm">
         <p className="text-red-300">{error}</p>
