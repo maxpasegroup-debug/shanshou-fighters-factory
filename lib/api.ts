@@ -25,7 +25,8 @@ export function conflict(error: string) {
 }
 
 export function handleApiError(scope: string, error: unknown) {
-  console.error(`[${scope}]`, error);
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`[${scope}]`, message, error);
   return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 }
 

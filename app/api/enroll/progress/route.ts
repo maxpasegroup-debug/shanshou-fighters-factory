@@ -43,6 +43,6 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(enrollment);
   } catch (error) {
-    return handleApiError("enroll/progress-legacy", error);
+    return handleApiError("enroll/progress", error);
   }
 }

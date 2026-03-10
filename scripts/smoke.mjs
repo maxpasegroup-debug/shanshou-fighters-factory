@@ -23,7 +23,7 @@ function fail(name, details = "") {
 }
 
 async function checkPublicPages() {
-  const pages = ["/", "/home", "/marketplace", "/experts", "/journey", "/login", "/register", "/health"];
+  const pages = ["/", "/home", "/dashboard/training", "/journey", "/login", "/register", "/health"];
   let ok = true;
 
   for (const path of pages) {

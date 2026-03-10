@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { Types } from "mongoose";
 
+import { handleApiError, unauthorized } from "@/lib/api";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Course from "@/models/Course";
@@ -50,7 +51,7 @@ type LessonLean = {
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session) return unauthorized();
 
     await connectToDatabase();
     const enrollments = (await Enrollment.find({ userId: session.user.id }).lean()) as EnrollmentLean[];
@@ -89,6 +90,6 @@ export async function GET() {
 
     return NextResponse.json(items);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch learning journey", details: `${error}` }, { status: 500 });
+    return handleApiError("mycourses/list", error);
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { handleApiError, unauthorized } from "@/lib/api";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Trainer from "@/models/Trainer";
@@ -19,7 +20,7 @@ export async function GET() {
       .lean();
     return NextResponse.json(trainers);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch trainers", details: `${error}` }, { status: 500 });
+    return handleApiError("trainers/list", error);
   }
 }
 
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || (session.user.role !== "trainer" && session.user.role !== "admin")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorized();
     }
 
     const payload = await request.json();
@@ -48,6 +49,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(trainer, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to save trainer", details: `${error}` }, { status: 500 });
+    return handleApiError("trainers/save", error);
   }
 }

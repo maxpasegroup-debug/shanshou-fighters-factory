@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { handleApiError, unauthorized } from "@/lib/api";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Review from "@/models/Review";
@@ -15,14 +16,14 @@ export async function GET(request: Request) {
     const reviews = await Review.find(query).populate("userId", "name avatar").lean();
     return NextResponse.json(reviews);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch reviews", details: `${error}` }, { status: 500 });
+    return handleApiError("reviews/list", error);
   }
 }
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session) return unauthorized();
 
     const { courseId, rating, comment } = await request.json();
     if (!courseId || !rating || !comment) {
@@ -38,6 +39,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to save review", details: `${error}` }, { status: 500 });
+    return handleApiError("reviews/save", error);
   }
 }

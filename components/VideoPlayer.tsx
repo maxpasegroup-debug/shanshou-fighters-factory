@@ -39,11 +39,12 @@ export default function VideoPlayer({
   const markCompleted = async (lessonId: string) => {
     if (completed.includes(lessonId)) return;
     setCompleted((prev) => [...prev, lessonId]);
-    await fetch("/api/enroll", {
+    const res = await fetch("/api/enroll/progress", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ courseId, lessonId }),
     });
+    if (!res.ok) setCompleted((prev) => prev.filter((id) => id !== lessonId));
   };
 
   return (

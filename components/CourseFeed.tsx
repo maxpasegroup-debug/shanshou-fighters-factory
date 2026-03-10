@@ -17,11 +17,24 @@ type CourseItem = {
   };
 };
 
-type CourseFeedProps = {
-  limit?: number;
+type FallbackCourse = {
+  _id: string;
+  title: string;
+  thumbnail: string;
+  trainer?: string;
+  rating: number;
+  price?: number;
+  duration?: string;
+  level?: string;
 };
 
-export default function CourseFeed({ limit }: CourseFeedProps) {
+type CourseFeedProps = {
+  limit?: number;
+  /** Used when API returns no courses (e.g. demo data from training module). */
+  fallbackCourses?: FallbackCourse[];
+};
+
+export default function CourseFeed({ limit = 8, fallbackCourses }: CourseFeedProps) {
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,7 +61,7 @@ export default function CourseFeed({ limit }: CourseFeedProps) {
     };
   }, []);
 
-  const normalized = useMemo(
+  const fromApi = useMemo(
     () =>
       courses.slice(0, limit ?? courses.length).map((course) => ({
         _id: course._id,
@@ -60,6 +73,12 @@ export default function CourseFeed({ limit }: CourseFeedProps) {
       })),
     [courses, limit],
   );
+
+  const normalized = useMemo(() => {
+    if (fromApi.length) return fromApi;
+    if (fallbackCourses?.length) return fallbackCourses.slice(0, limit);
+    return fromApi;
+  }, [fromApi, fallbackCourses, limit]);
 
   if (loading) {
     return (

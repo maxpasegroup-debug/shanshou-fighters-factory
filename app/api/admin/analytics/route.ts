@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { handleApiError, unauthorized } from "@/lib/api";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Booking from "@/models/Booking";
@@ -12,7 +13,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorized();
     }
 
     await connectToDatabase();
@@ -43,9 +44,6 @@ export async function GET() {
       totalRevenue,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch analytics", details: `${error}` },
-      { status: 500 },
-    );
+    return handleApiError("admin/analytics", error);
   }
 }

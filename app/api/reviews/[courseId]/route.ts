@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { handleApiError } from "@/lib/api";
 import { connectToDatabase } from "@/lib/mongodb";
 import Review from "@/models/Review";
 
@@ -16,9 +17,6 @@ export async function GET(_: Request, { params }: Params) {
       .lean();
     return NextResponse.json(reviews);
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch course reviews", details: `${error}` },
-      { status: 500 },
-    );
+    return handleApiError("reviews/course", error);
   }
 }

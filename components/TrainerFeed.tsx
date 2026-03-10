@@ -17,7 +17,22 @@ type TrainerItem = {
   };
 };
 
-export default function TrainerFeed() {
+type FallbackTrainer = {
+  _id: string;
+  name: string;
+  photo: string;
+  specialty: string;
+  rating: number;
+  courses: number;
+  yearsExperience?: number;
+};
+
+type TrainerFeedProps = {
+  /** Used when API returns no trainers (e.g. demo data from training module). */
+  fallbackTrainers?: FallbackTrainer[];
+};
+
+export default function TrainerFeed({ fallbackTrainers }: TrainerFeedProps) {
   const [trainers, setTrainers] = useState<TrainerItem[]>([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [loading, setLoading] = useState(true);
@@ -45,26 +60,29 @@ export default function TrainerFeed() {
     };
   }, []);
 
-  const normalized = useMemo(
+  const fromApi = useMemo(
     () =>
-      trainers
-        .map((trainer) => ({
-          _id: trainer._id,
-          name: trainer.userId?.name || "Trainer",
-          photo:
-            trainer.userId?.avatar ||
-            "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80",
-          specialty: trainer.specialty,
-          rating: Number(trainer.rating || 0),
-          courses: Array.isArray(trainer.courses) ? trainer.courses.length : 0,
-        }))
-        .filter((trainer) =>
-          activeFilter === "All"
-            ? true
-            : trainer.specialty.toLowerCase().includes(activeFilter.toLowerCase()),
-        ),
-    [trainers, activeFilter],
+      trainers.map((trainer) => ({
+        _id: trainer._id,
+        name: trainer.userId?.name || "Trainer",
+        photo:
+          trainer.userId?.avatar ||
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80",
+        specialty: trainer.specialty,
+        rating: Number(trainer.rating || 0),
+        courses: Array.isArray(trainer.courses) ? trainer.courses.length : 0,
+      })),
+    [trainers],
   );
+
+  const normalized = useMemo(() => {
+    const list = fromApi.length ? fromApi : fallbackTrainers ?? [];
+    return list.filter((trainer) =>
+      activeFilter === "All"
+        ? true
+        : trainer.specialty.toLowerCase().includes(activeFilter.toLowerCase()),
+    );
+  }, [fromApi, fallbackTrainers, activeFilter]);
 
   if (loading) {
     return (
@@ -111,7 +129,14 @@ export default function TrainerFeed() {
       {normalized.length ? (
         <div className="grid gap-3 md:grid-cols-2">
           {normalized.map((trainer) => (
-            <TrainerCard key={trainer._id} trainer={trainer} />
+            <TrainerCard
+              key={trainer._id}
+              trainer={{
+                ...trainer,
+                yearsExperience: "yearsExperience" in trainer ? trainer.yearsExperience : undefined,
+              }}
+              actionLabel="View Programs"
+            />
           ))}
         </div>
       ) : (

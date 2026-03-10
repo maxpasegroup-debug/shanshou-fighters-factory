@@ -9,7 +9,8 @@
     "lint": "next lint",
     "seed": "node scripts/seed.mjs",
     "seed:reset": "node scripts/seed.mjs --reset",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "validate-env": "node scripts/validate-env.mjs"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.1",

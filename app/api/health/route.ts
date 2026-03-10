@@ -20,8 +20,8 @@ export async function GET() {
     await connectToDatabase();
     db.ok = true;
     db.message = "Connected";
-  } catch (error) {
-    db.message = `Failed: ${error}`;
+  } catch {
+    db.message = "Unavailable";
   }
 
   const stripe = { ok: false, message: "" };
@@ -29,23 +29,17 @@ export async function GET() {
     getStripe();
     stripe.ok = true;
     stripe.message = "Configured";
-  } catch (error) {
-    stripe.message = `Failed: ${error}`;
+  } catch {
+    stripe.message = "Unavailable";
   }
 
   const cloudinary = checkCloudinaryConfig();
+  const cloudinarySafe = { ok: cloudinary.ok, message: cloudinary.ok ? "Configured" : "Unavailable" };
 
   const overall = db.ok && stripe.ok && cloudinary.ok;
   return NextResponse.json({
     ok: overall,
-    checks: {
-      database: db,
-      stripe,
-      cloudinary: {
-        ok: cloudinary.ok,
-        missing: cloudinary.missing,
-      },
-    },
+    checks: { database: db, stripe, cloudinary: cloudinarySafe },
     environment: process.env.NODE_ENV || "development",
     responseTimeMs: Date.now() - startedAt,
     timestamp: new Date().toISOString(),

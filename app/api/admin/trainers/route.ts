@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { badRequest, handleApiError, unauthorized } from "@/lib/api";
 import { authOptions } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import Trainer from "@/models/Trainer";
@@ -9,7 +10,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorized();
     }
 
     await connectToDatabase();
@@ -19,7 +20,7 @@ export async function GET() {
       .lean();
     return NextResponse.json(trainers);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch trainers", details: `${error}` }, { status: 500 });
+    return handleApiError("admin/trainers/list", error);
   }
 }
 
@@ -27,11 +28,11 @@ export async function PATCH(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorized();
     }
 
     const { trainerId, approved } = await request.json();
-    if (!trainerId) return NextResponse.json({ error: "trainerId is required" }, { status: 400 });
+    if (!trainerId) return badRequest("trainerId is required");
 
     await connectToDatabase();
     const trainer = await Trainer.findByIdAndUpdate(
@@ -41,6 +42,6 @@ export async function PATCH(request: Request) {
     );
     return NextResponse.json(trainer);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to approve trainer", details: `${error}` }, { status: 500 });
+    return handleApiError("admin/trainers/approve", error);
   }
 }
