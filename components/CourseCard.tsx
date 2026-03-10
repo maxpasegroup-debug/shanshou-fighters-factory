@@ -10,7 +10,9 @@ type CourseCardProps = {
     thumbnail: string;
     trainer?: string;
     rating: number;
-    price: number;
+    price?: number;
+    duration?: string;
+    level?: string;
   };
 };
 
@@ -23,9 +25,11 @@ export default function CourseCard({ course }: CourseCardProps) {
       <div className="space-y-1 p-3">
         <h3 className="line-clamp-1 font-semibold">{course.title}</h3>
         <p className="text-xs text-zinc-400">{course.trainer || "Trainer"}</p>
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm">
           <span className="text-yellow-400">★ {course.rating.toFixed(1)}</span>
-          <span>{formatCurrency(course.price)}</span>
+          {course.duration ? <span className="text-zinc-400">{course.duration}</span> : null}
+          {course.level ? <span className="text-zinc-400">{course.level}</span> : null}
+          {course.price != null ? <span>{formatCurrency(course.price)}</span> : null}
         </div>
       </div>
     </Link>

@@ -7,9 +7,8 @@ import { cn } from "@/utils/helpers";
 
 const tabs = [
   { href: "/home", label: "Home" },
+  { href: "/dashboard/training", label: "Training" },
   { href: "/journey", label: "Journey" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/experts", label: "Experts" },
   { href: "/profile", label: "Profile" },
 ];
 
@@ -18,7 +17,7 @@ export default function BottomNavigation() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-black/90 p-2 backdrop-blur md:hidden">
-      <div className="mx-auto grid max-w-lg grid-cols-5 gap-1">
+      <div className="mx-auto grid max-w-lg grid-cols-4 gap-1">
         {tabs.map((tab) => (
           <Link
             key={tab.href}
